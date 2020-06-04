@@ -7,6 +7,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsItemGroup>
 #include <QTimer>
+#include "movableitem.h"
 
 class MyGraphicView : public QGraphicsView
 {
@@ -20,8 +21,9 @@ public:
        ~MyGraphicView();
 
 
-    void createMovableRectangle(); // создание перетаскиваемого объекта (по нажатию кнопки)
-    void removeGraphicsItem(QGraphicsItem * removedItem); //удаление графического объекта
+    void createMovableRectangle(); // создание перетаскиваемого прямоугольника (по нажатию кнопки)
+    void createMovableLine();      // создание лиманой линии (по нажатию кнопки)
+    void removeGraphicsItem(MovableItem * removedItem); //удаление графического объекта
 
 signals:
 

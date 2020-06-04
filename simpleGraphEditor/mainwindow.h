@@ -5,6 +5,7 @@
 #include <QPushButton>
 #include <QColor>
 #include <QGraphicsItem>
+#include "movableitem.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -15,8 +16,9 @@ extern QColor currentLineColor;
 extern QColor currentFillColor;
 extern int    currentLineWidth;
 extern int    currentAngle;
-extern QGraphicsItem * activeGraphicsItem;
-void  setActiveGraphicsItem(QGraphicsItem * newActiveItem);
+extern MovableItem * activeGraphicsItem;
+const int fixedMark=3; //размер кружка для горячей точки
+void  setActiveGraphicsItem(MovableItem * newActiveItem);
 
 class MainWindow : public QMainWindow
 {

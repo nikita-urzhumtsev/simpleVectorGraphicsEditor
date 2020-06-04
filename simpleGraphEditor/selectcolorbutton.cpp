@@ -1,7 +1,7 @@
 #include "selectcolorbutton.h"
 #include <QColorDialog>
 
-SelectColorButton::SelectColorButton( QWidget* parent )
+SelectColorButton::SelectColorButton( QWidget* )
 {
     connect( this, SIGNAL(clicked()), this, SLOT(changeColor()) );
 }

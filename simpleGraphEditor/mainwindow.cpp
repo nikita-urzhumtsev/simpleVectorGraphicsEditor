@@ -4,16 +4,16 @@
 #include <QPainter>
 #include <QColor>
 #include <QColorDialog>
-#include "moveitem.h"
+#include "movableitem.h"
 
 QColor currentLineColor(Qt::cyan);
 QColor currentFillColor(Qt::white);
 int    currentLineWidth=1;
 int    currentAngle=10;
-QGraphicsItem * activeGraphicsItem = nullptr;
+MovableItem * activeGraphicsItem = nullptr;
 MainWindow * mainWindow = nullptr;
 
-void  setActiveGraphicsItem(QGraphicsItem * newActiveItem)
+void  setActiveGraphicsItem(MovableItem * newActiveItem)
 {
     if (activeGraphicsItem && activeGraphicsItem!=newActiveItem)
     { QGraphicsItem * deactivatedItem=activeGraphicsItem;
@@ -27,7 +27,7 @@ void  setActiveGraphicsItem(QGraphicsItem * newActiveItem)
     }
 
     if (activeGraphicsItem)
-    {   MoveItem * grItem=dynamic_cast<MoveItem *>(activeGraphicsItem);
+    {   MovableItem * grItem=dynamic_cast<MovableItem *>(activeGraphicsItem);
         currentFillColor=grItem->getFillColor();
         currentLineColor=grItem->getLineColor();
         currentLineWidth=grItem->getLineWidth();
@@ -68,6 +68,7 @@ void MainWindow::on_buttonCreateRectangle_clicked()
 void MainWindow::on_buttonCreatePolyline_clicked()
 {
     // TODO: создать ломаную
+    ui->graphicsView->createMovableLine();
 }
 
 void MainWindow::on_buttonDeleteGraphicsItem_clicked()
@@ -137,7 +138,7 @@ void MainWindow::on_buttonChangeGraphicsItem_clicked()
 {
    if (activeGraphicsItem)
    {
-       MoveItem * item = dynamic_cast<MoveItem *>(activeGraphicsItem);
+       MovableItem * item = dynamic_cast<MovableItem *>(activeGraphicsItem);
        item->setFillColor(currentFillColor);
        item->setLineColor(currentLineColor);
        item->setLineWidth(currentLineWidth);

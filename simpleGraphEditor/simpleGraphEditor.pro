@@ -16,16 +16,20 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    linearitem.cpp \
     main.cpp \
     mainwindow.cpp \
-    moveitem.cpp \
+    movableitem.cpp \
     mygraphicview.cpp \
+    rectangleitem.cpp \
     selectcolorbutton.cpp
 
 HEADERS += \
+    linearitem.h \
     mainwindow.h \
-    moveitem.h \
+    movableitem.h \
     mygraphicview.h \
+    rectangleitem.h \
     selectcolorbutton.h
 
 FORMS += \

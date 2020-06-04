@@ -1,5 +1,7 @@
 #include "mygraphicview.h"
-#include "moveitem.h"
+#include "movableitem.h"
+#include "linearitem.h"
+#include "rectangleitem.h"
 #include "mainwindow.h"
 
 //TODO все magic numbers надо вынести в константы (по всему проекту)
@@ -38,16 +40,23 @@ void MyGraphicView::deleteItemsFromGroup(QGraphicsItemGroup *group)
     }
 }
 
-
-void MyGraphicView::createMovableRectangle()
+void MyGraphicView::createMovableLine()
 {
-  MoveItem *item = new MoveItem(); // перетаскиваемый прямоугольник
+  LinearItem *item = new LinearItem(); // перетаскиваемый прямоугольник
   item->setPos(100,100);           // координаты для нового объекта по умолчанию (TODO по хорошему его нужно рисовать мышкой)
   scene->addItem(item);            // вставляю элемент в графическую сцену
 
 }
 
-void MyGraphicView::removeGraphicsItem(QGraphicsItem * removedItem)
+void MyGraphicView::createMovableRectangle()
+{
+  RectangleItem *item = new RectangleItem(); // перетаскиваемый прямоугольник
+  item->setPos(100,100);           // координаты для нового объекта по умолчанию (TODO по хорошему его нужно рисовать мышкой)
+  scene->addItem(item);            // вставляю элемент в графическую сцену
+
+}
+
+void MyGraphicView::removeGraphicsItem(MovableItem * removedItem)
 { if (removedItem)
   { scene->removeItem(removedItem);
     delete removedItem;

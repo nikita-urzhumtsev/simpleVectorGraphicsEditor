@@ -1,46 +1,29 @@
-#include "moveitem.h"
-#include "mainwindow.h"
+#include "rectangleitem.h"
 #include <QtMath>
 
-//TODO перенести в глобалные данные/константы
-const int fixedMark=3; //размер кружка для горячей точки
+#include "mainwindow.h" //TODO там пока(!!!) живут глобальные данные - непорядок
 
-MoveItem::MoveItem(QObject *parent) :
-    QObject(parent), QGraphicsItem(), mousePressStartPos(0,0)
+RectangleItem::RectangleItem(QObject *parent):
+  MovableItem(parent), mousePressStartPos(0,0)
 {
     width=120;          // ширина прямоугольника
-    height=60;         // высота прямоугольника
+    height=60;          // высота прямоугольника
     leftBaseCorner=-width/2; // левый/верхний угол привязки прямоугольника
     topBaseCorner=-height/2;
 
     angle=currentAngle;           // угол поворта прямоугольника в градусах
-    fillColor=currentFillColor;   // цвет заливки
-    borderWidth=currentLineWidth; // полщина линии
-    borderColor=currentLineColor; // цвет линии
+
     isRotatingNow=false;          // флаг состояния вращения в настоящий момент
     widthIsChangingNow=false;     // флаг состояния изменения ширины в настоящий момент
     heightIsChangingNow=false;    // флаг состояния изменения высоты в настоящий момент
 
 
-    hotPoints.set(width,height,angle, borderWidth); // вычисляю горячие точки и boundingRect
-    // меняю активный элемент
-    // TODO сравнить с функцией void  setActiveGraphicsItem(QGraphicsItem * newActiveItem) - отрефакторить
-    if (activeGraphicsItem)
-    { QGraphicsItem * deactivatedItem=activeGraphicsItem;
-      activeGraphicsItem=this;
-      deactivatedItem->setAcceptHoverEvents(false);
-      deactivatedItem->update();
-    }
-    else
-    {
-      activeGraphicsItem=this;
-      setAcceptHoverEvents(true);
-    }
+    hotPoints.set(width,height,angle, getLineWidth()); // вычисляю горячие точки и boundingRect
+
 }
 
-MoveItem::~MoveItem()
+RectangleItem::~RectangleItem()
 {
-
 }
 
 void HotPoints::set(int width, int height, int angle, int borderWidth)
@@ -83,7 +66,7 @@ int angleBetweenVectors( const QPointF & A, const QPointF & B)
     return qRadiansToDegrees(qAcos(t));
 }
 
-QRectF MoveItem::boundingRect() const
+QRectF RectangleItem::boundingRect() const
 {   // вычисляю минимальный (по координатам) угол прямоугольника
     std::vector<qreal> vX = {hotPoints.Bx, -hotPoints.Bx, hotPoints.Cx, -hotPoints.Cx};
     std::vector<qreal> vY = {hotPoints.By, -hotPoints.By, hotPoints.Cy, -hotPoints.Cy};
@@ -95,13 +78,14 @@ QRectF MoveItem::boundingRect() const
     return QRectF (minX-borderWidth/2-1,minY-borderWidth/2-1,-2*minX+borderWidth+2,-2*minY+borderWidth+2);
 }
 
-void MoveItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+
+void RectangleItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     // рисую прямоугольник с заданными цветами, толщиной линии и углом поворота
-    QPen pen(borderColor);
-    pen.setWidth(borderWidth);
+    QPen pen(getLineColor());
+    pen.setWidth(getLineWidth());
     painter->setPen(pen);
-    painter->setBrush(fillColor);
+    painter->setBrush(getFillColor());
     painter->rotate(angle);
     painter->drawRect(leftBaseCorner,topBaseCorner,width,height);
 
@@ -141,7 +125,7 @@ void MoveItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     Q_UNUSED(widget);
 }
 
-void MoveItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+void RectangleItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
     qDebug() << "mouseMoveEvent:    pos=(x:" << event->pos().x()<<", y:"<<event->pos().y()<< "), A=(x:" << hotPoints.Ax<<", y:"<<hotPoints.Ay<< ") ";
 
@@ -181,7 +165,7 @@ void MoveItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
 }
 
-void MoveItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
+void RectangleItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     qDebug() << "mousePressEvent:   pos=(x:" << event->pos().x()<<", y:"<<event->pos().y()<< "), C=(x:" << hotPoints.Cx<<", y:"<<hotPoints.Cy<< ") ";
 
@@ -238,7 +222,7 @@ void MoveItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
 
 
-void MoveItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+void RectangleItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {   // восстанавливаю курсор и сбрасываю флаги изменения размера и вращения
     this->setCursor(QCursor(Qt::ArrowCursor));
     isRotatingNow=false;
@@ -250,7 +234,7 @@ void MoveItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
     Q_UNUSED(event);
 }
 
-void MoveItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
+void RectangleItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 {
 
     // создаю "горячие точки" для изменения размера
@@ -294,25 +278,14 @@ void MoveItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 
 }
 
-void MoveItem::setFillColor(QColor color)
-{
-    fillColor=color;
-}
-
-void MoveItem::setLineColor(QColor color)
-{
-    borderColor=color;
-}
-
-void MoveItem::setLineWidth(int lineWidth)
+void RectangleItem::setLineWidth(int lineWidth)
 {
     borderWidth=lineWidth;
     hotPoints.set(width,height,angle, borderWidth);
 }
 
-void MoveItem::setAngle(int newAngle)
+void RectangleItem::setAngle(int newAngle)
 {
     angle=newAngle;
     hotPoints.set(width,height,angle, borderWidth);
 }
-

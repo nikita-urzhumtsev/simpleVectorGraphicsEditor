@@ -9,7 +9,7 @@ class SelectColorButton : public QPushButton
 {
     Q_OBJECT
 public:
-    SelectColorButton( QWidget* parent );
+    SelectColorButton(QWidget*);
 
     void setColor( const QColor& color );
     const QColor& getColor();
