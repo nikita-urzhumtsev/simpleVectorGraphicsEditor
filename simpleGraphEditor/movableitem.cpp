@@ -3,7 +3,7 @@
 
 
 MovableItem::MovableItem(QObject *parent) :
-    QObject(parent), QGraphicsItem()
+    QObject(parent), QGraphicsItem(), mousePressStartPos(0,0)
 {
     fillColor=currentFillColor;   // цвет заливки
     borderWidth=currentLineWidth; // полщина линии
@@ -46,3 +46,16 @@ void MovableItem::setLineWidth(int lineWidth)
 }
 
 
+qreal MovableItem::hotPointVisibleRadius()
+{
+    qreal visibleRadius = borderWidth<fixedMark ? borderWidth : fixedMark; // горячая точка не должна быть слишком большой
+    if (visibleRadius==1) visibleRadius=2;
+
+    return visibleRadius;
+}
+
+qreal MovableItem::hotPointRadius()
+{
+    qreal radius=10;//2*fixedMark; // зона захвата мыши пусть будет в 2 раза больше, чем видимая точка, так ее будет легче поймать
+    return radius;
+}

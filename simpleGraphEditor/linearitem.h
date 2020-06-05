@@ -12,6 +12,9 @@ public:
     ~LinearItem();
 
 private:
+    QPolygonF lineNodes;// узлы полилинии
+
+    virtual QRectF frameRect() const; // вычисление рамки фигуры
     QRectF boundingRect() const; // вычисление обрамляющего прямоугольника
 
 protected:

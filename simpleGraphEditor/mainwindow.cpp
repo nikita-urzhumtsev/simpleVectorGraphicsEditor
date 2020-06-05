@@ -67,7 +67,6 @@ void MainWindow::on_buttonCreateRectangle_clicked()
 
 void MainWindow::on_buttonCreatePolyline_clicked()
 {
-    // TODO: создать ломаную
     ui->graphicsView->createMovableLine();
 }
 
@@ -143,7 +142,7 @@ void MainWindow::on_buttonChangeGraphicsItem_clicked()
        item->setLineColor(currentLineColor);
        item->setLineWidth(currentLineWidth);
        item->setAngle(currentAngle);
-       item->update();// TODO может быть имеет смсыл перерисовать всю сцену целиком иначе возникают интересные эффекты при резких поворатах узких прямоугольников
+       item->update();
    }
 
 }

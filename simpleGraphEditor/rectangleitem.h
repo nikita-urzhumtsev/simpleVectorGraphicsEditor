@@ -19,13 +19,13 @@ protected:
     int height;         // высота прямоугольника
     int angle;          // угол поворта прямоугольника в градусах
 
+    virtual QRectF frameRect() const; // вычисление рамки фигуры
     QRectF boundingRect() const; // вычисление обрамляющего прямоугольника
 
 protected:
     bool isRotatingNow;         // флаг состояния вращения в настоящий момент
     bool widthIsChangingNow;    // флаг состояния изменения ширины в настоящий момент
     bool heightIsChangingNow;   // флаг состояния изменения высоты в настоящий момент
-    QPointF mousePressStartPos; // начальная позиция нажатия кнопки мыши
     HotPoints hotPoints;        // горячие точки для управления размером и поворота фигуры
     int mousePressStartAngle;   // начальный угол, когда была нажата кнопка мыши
     int mousePressStartWidth;   // начальный ширина, когда была нажата кнопка мыши

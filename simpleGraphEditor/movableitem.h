@@ -21,10 +21,8 @@ public:
     qreal Cx; // Точка C - второй угол, (-С) - угол по диагонали от второго
     qreal Cy; // точка C = (Cx, Cy) - за нее можно крутить фигуру
 
-    qreal radius; // радиус горячей точки
-    qreal visibleRadius; // видимый радиус горячей точки
 
-    void set(int width, int height, int angle, int borderWidth);
+    void set(int width, int height, int angle);
 };
 
 class MovableItem : public QObject, public QGraphicsItem
@@ -41,6 +39,12 @@ class MovableItem : public QObject, public QGraphicsItem
       QColor fillColor;   // цвет заливки
       int    borderWidth; // полщина линии
       QColor borderColor; // цвет линии
+
+      QPointF mousePressStartPos; // начальная позиция нажатия кнопки мыши
+
+      virtual QRectF frameRect() const =0; // вычисление рамки фигуры
+      qreal hotPointVisibleRadius(); //видимый радиус горячей точки
+      qreal hotPointRadius();        //радиус зоны активности горячей точки
 
    public:
       virtual QColor getFillColor(){return fillColor;};

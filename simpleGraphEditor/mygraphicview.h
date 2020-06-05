@@ -25,6 +25,7 @@ public:
     void createMovableLine();      // создание лиманой линии (по нажатию кнопки)
     void removeGraphicsItem(MovableItem * removedItem); //удаление графического объекта
 
+
 signals:
 
 private slots:
