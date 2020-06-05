@@ -13,6 +13,8 @@ public:
 
 private:
     QPolygonF lineNodes;// узлы полилинии
+    bool nodeIsChangingNow;    // флаг состояния изменения ширины в настоящий момент
+    QPointF mousePressStartNode; // узел, который сейчас двигаю
 
     virtual QRectF frameRect() const; // вычисление рамки фигуры
     QRectF boundingRect() const; // вычисление обрамляющего прямоугольника
