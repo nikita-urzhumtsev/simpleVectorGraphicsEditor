@@ -43,5 +43,9 @@ private slots:
     void on_spinBoxAngle_valueChanged(int arg1);
     void on_buttonDeleteGraphicsItem_clicked();
     void on_buttonChangeGraphicsItem_clicked();
+    void on_actionOpen_triggered();
+    void on_actionSave_triggered();
+    void on_actionSave_As_triggered();
+    void on_actionExit_triggered();
 };
 #endif // MAINWINDOW_H

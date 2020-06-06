@@ -24,7 +24,7 @@ public:
     void createMovableRectangle(); // создание перетаскиваемого прямоугольника (по нажатию кнопки)
     void createMovableLine();      // создание лиманой линии (по нажатию кнопки)
     void removeGraphicsItem(MovableItem * removedItem); //удаление графического объекта
-
+    void saveToFile(const QString & documentFileName);  // сохраняю сцены в файл
 
 signals:
 

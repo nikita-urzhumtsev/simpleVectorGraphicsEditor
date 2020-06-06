@@ -4,12 +4,15 @@
 #include <QPainter>
 #include <QColor>
 #include <QColorDialog>
+#include <QFileDialog>
 #include "movableitem.h"
 
 QColor currentLineColor(Qt::cyan);
 QColor currentFillColor(Qt::white);
 int    currentLineWidth=1;
 int    currentAngle=10;
+QString documentFileName("newFile.svg"); // имя документа
+
 MovableItem * activeGraphicsItem = nullptr;
 MainWindow * mainWindow = nullptr;
 
@@ -145,4 +148,31 @@ void MainWindow::on_buttonChangeGraphicsItem_clicked()
        item->update();
    }
 
+}
+
+void MainWindow::on_actionOpen_triggered()
+{ // TODO открыть файл
+
+}
+
+void MainWindow::on_actionSave_triggered()
+{
+  ui->graphicsView->saveToFile(documentFileName); // TODO сейчас нет защиты от ошибок файловой системы
+}
+
+void MainWindow::on_actionSave_As_triggered()
+{
+   QString newPath = QFileDialog::getSaveFileName(this, "Save SVG",  documentFileName, "SVG files (*.svg)");
+
+   if (newPath.isEmpty())
+          return;
+
+   documentFileName = newPath;
+
+   ui->graphicsView->saveToFile(documentFileName);
+}
+
+void MainWindow::on_actionExit_triggered()
+{ // TODO вежливо поставить защиту от выхода с несохраненными данными
+  this->close();
 }
