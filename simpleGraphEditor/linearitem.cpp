@@ -5,13 +5,8 @@
 LinearItem::LinearItem(QObject *parent):
     MovableItem(parent)
 {
-    lineNodes.append(QPointF(  0,  0));
-    lineNodes.append(QPointF(100, 10));
-    lineNodes.append(QPointF(100, 140));
-    lineNodes.append(QPointF(110, 240));
-    lineNodes.append(QPointF( 50, 170));
-    lineNodes.append(QPointF( 90, 200));
-    lineNodes.append(QPointF( 10, 140));
+    lineNodes.append(QPointF(  0,  0));  // созданию линию по умолчанию
+    lineNodes.append(QPointF(100, 100)); // дальнейшее развитие может быть рисовать ее мышкой
 
     nodeIsChangingNow=false;
 }
@@ -40,7 +35,7 @@ QRectF LinearItem::boundingRect() const
     std::vector<qreal> dimentions = {frameRect.height()+borderWidth, frameRect.width()+borderWidth};
     int extraSpace = ( *std::max_element(dimentions.begin(), dimentions.end()) ) / 2 ;
 
-    // квадрат с самой большой стороной, куда гаратированно помещается прямоугольник с рамкой
+    // квадрат с самой большой стороной, куда гарантированно помещается прямоугольник с рамкой
     return frameRect.adjusted(-extraSpace,-extraSpace,extraSpace,extraSpace);
 }
 
@@ -59,7 +54,7 @@ void LinearItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
     if (activeGraphicsItem == this)
     {
         // рисую границы активного объекта
-        QPen pen(Qt::gray );       //TODO цвет и стил рамки выделить в общие константы для всех фигур
+        QPen pen(Qt::gray );       //TODO цвет и стиль рамки выделить в общие константы для всех фигур
         pen.setStyle(Qt::DotLine);
         painter->setPen(pen);
         painter->setBrush(Qt::NoBrush);
@@ -84,7 +79,7 @@ void LinearItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
 
 // функция для вычисления точки проекции заданной точки M(Хм,Ум) до прямой, проходящей через точки A(х1,у1) и B(х2,у2)
 QPointF projectionToLine(QPointF M, QPointF A, QPointF B)
-{   // вначале проверяю вырожденные случаю
+{   // вначале проверяю вырожденные случаи
     if (A.x()==B.x()) {return QPointF(A.x(),M.y());};
     if (A.y()==B.y()) {return QPointF(M.x(),A.y());};
 
@@ -110,7 +105,7 @@ QPointF projectionToLine(QPointF M, QPointF A, QPointF B)
 
 }
 
-// функция для вычисления Расстояния от заданной точки M(Хм,Ум) до прямой, проходящей через точки A(х1,у1) и B(х2,у2)
+// функция для вычисления расстояния от заданной точки M(Хм,Ум) до прямой, проходящей через точки A(х1,у1) и B(х2,у2)
 qreal distanceToPoint(QPointF M, QPointF A)
 {   //считаю расстояние между точками М и A
     qreal distance, dx,dy;
@@ -121,7 +116,7 @@ qreal distanceToPoint(QPointF M, QPointF A)
 
 }
 
-// функция для вычисления Расстояния от заданной точки M(Хм,Ум) до прямой, проходящей через точки A(х1,у1) и B(х2,у2)
+// функция для вычисления расстояния от заданной точки M(Хм,Ум) до прямой, проходящей через точки A(х1,у1) и B(х2,у2)
 qreal distanceToLine(QPointF M, QPointF A, QPointF B)
 {   // Получаю координаты проекции на линию
     QPointF projectionPoint=projectionToLine(M,A,B);
@@ -131,14 +126,17 @@ qreal distanceToLine(QPointF M, QPointF A, QPointF B)
 
 void LinearItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 { // TODO
-    qDebug() << "line.mouseMoveEvent:    pos=(x:" << event->pos().x()<<", y:"<<event->pos().y()<< "), A=(x:" << 0 <<", y:"<< 0 << ") ";
+  //  qDebug() << "line.mouseMoveEvent:    pos=(x:" << event->pos().x()<<", y:"<<event->pos().y()<< "), A=(x:" << 0 <<", y:"<< 0 << ") ";
 
     if (nodeIsChangingNow)
-    {
+    {  // если сейчас происходит перемещение узла
        int i=lineNodes.indexOf(this->mousePressStartNode);
-       lineNodes[i]=event->pos();
-       mousePressStartNode=event->pos();
-       update();
+       if (i>=0) // на вскяий случай проверю, что точка найдена
+       {
+         lineNodes[i]=event->pos();
+         mousePressStartNode=event->pos();
+         update();
+       }
     }
     else
     { // двигаю объект
@@ -174,7 +172,7 @@ void LinearItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
     if (closeToHotPoint)
     {
         nodeIsChangingNow=true;
-        return; // Преимущества у горячих точке, если мышка рядом с ней, то работаем с горячей точкой
+        return; // если мышка рядом с горячей точкой, то работаем с ней и не двигаем фигуру
     }
 
 
@@ -201,11 +199,10 @@ void LinearItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
        // или следующая точка за активной точкой лежит слишком близко
        if (
                (i>0 && distanceToPoint(lineNodes[i], lineNodes[i-1])<2) ||
-               (i<lineNodes.count() && distanceToPoint(lineNodes[i], lineNodes[i+1])<2)
+               (i<lineNodes.count()-1 && distanceToPoint(lineNodes[i], lineNodes[i+1])<2)
           )
        { // удалю активную точку
-           qDebug()<<"\n\n============================== remove point number"<<i;
-           lineNodes.remove(i);
+         lineNodes.remove(i);
        }
        update();
     }
@@ -214,13 +211,14 @@ void LinearItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
     nodeIsChangingNow=false;
 }
 
-// функция для работы с линями (как минимум для определения активного ребра и вставки нового узла)
+// функция для работы с линиями (как минимум для определения активного ребра и вставки нового узла)
 template< typename Func >
 bool LinearItem::findSuitableLineAndDo(QPointF pos, Func func )
 {
     qreal distance;
     for (int i=0; i<lineNodes.count()-1;++i)
-    {   distance=distanceToLine(pos,lineNodes[i], lineNodes[i+1]);
+    {
+        distance=distanceToLine(pos,lineNodes[i], lineNodes[i+1]);
         // прямоугольник с диагональю равной данному отрезку (и слегка увеличенный по ширине и высоте)
         QRectF lineRect=QRectF(lineNodes[i], lineNodes[i+1]);
         lineRect.adjust(-hotPointRadius(),-hotPointRadius(),hotPointRadius(),hotPointRadius());
@@ -269,11 +267,11 @@ void LinearItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 
     // проверяю достаточно ли близко курсор мыши к линии
     bool closeToLine=findSuitableLineAndDo( event->pos(),[this, event](int i)
-    { this->setCursor(QCursor(Qt::UpArrowCursor));
+    { // да, курсор рядом с линией, меняю вид указателя мыши
+      this->setCursor(QCursor(Qt::UpArrowCursor));
       Q_UNUSED(event);
       Q_UNUSED(i);
     } );
-
 
     if (closeToLine) return; // нашел близкую линию, дальше буду работать с ней
 

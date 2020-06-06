@@ -12,12 +12,12 @@ public:
     ~LinearItem();
 
 private:
-    QPolygonF lineNodes;// узлы полилинии
-    bool nodeIsChangingNow;    // флаг состояния изменения ширины в настоящий момент
-    QPointF mousePressStartNode; // узел, который сейчас двигаю
+    QPolygonF lineNodes;                       // узлы полилинии
+    bool nodeIsChangingNow;                    // флаг перемещения узла в настоящий момент
+    QPointF mousePressStartNode;               // узел, который сейчас двигаю
 
-    virtual QRectF frameRect() const; // вычисление рамки фигуры
-    QRectF boundingRect() const; // вычисление обрамляющего прямоугольника
+    virtual QRectF frameRect() const;          // вычисление рамки фигуры
+    QRectF boundingRect() const;               // вычисление обрамляющего прямоугольника
 
     // выполняет операцию, заданную в func над ребром из lineNodes, близким к позиции pos
     // возвращает true, если такое ребро было найдено
@@ -25,15 +25,15 @@ private:
 
 protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-    void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
-    void mousePressEvent(QGraphicsSceneMouseEvent *event);
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
-    void hoverMoveEvent(QGraphicsSceneHoverEvent *event);
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
+    void mouseMoveEvent(QGraphicsSceneMouseEvent *event);        // обработка перемещения мышки (на узле - его перемещение, и на фигуре целиком - ее перемещение)
+    void mousePressEvent(QGraphicsSceneMouseEvent *event);       // здесь живет начало перемещения узла или начало перемещения фигуры целиком
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);     // здесь живет окончание перемещения узла и обработка "склеивания" узлов
+    void hoverMoveEvent(QGraphicsSceneHoverEvent *event);        // здесь живет изменение курсора мыши в зависимости от того, что можно сделать
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event); // здесь живет создание новго узла
 
 public:
-    virtual int getAngle() {return 0;};
-    virtual void setAngle(int newAngle);
+    virtual int getAngle() {return 0;};  // пустая функцая, в принципе можно было бы сделать еще вращение фигуры
+    virtual void setAngle(int newAngle); // пустая функцая, в принципе можно было бы сделать еще вращение фигуры
     virtual void setLineWidth(int lineWidth);
 };
 
