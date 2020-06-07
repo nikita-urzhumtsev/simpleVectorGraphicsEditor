@@ -24,7 +24,8 @@ public:
     void createMovableRectangle(); // создание перетаскиваемого прямоугольника (по нажатию кнопки)
     void createMovableLine();      // создание лиманой линии (по нажатию кнопки)
     void removeGraphicsItem(MovableItem * removedItem); //удаление графического объекта
-    void saveToFile(const QString & documentFileName);  // сохраняю сцены в файл
+    void saveToFile(const QString & documentFileName);  // сохраняю сцену в файл
+    void readFromFile(const QString & documentFileName);// загружаю сцену из файл
 
 signals:
 
@@ -34,7 +35,7 @@ private:
     QGraphicsScene      *scene;     // сцена, где будет происходить все действие :-)
 
 private:
-    void deleteItemsFromGroup(QGraphicsItemGroup *group_1);
+    //void deleteItemsFromGroup(QGraphicsItemGroup *group_1);
 };
 
 #endif // MYGRAPHICVIEW_H

@@ -152,12 +152,19 @@ void MainWindow::on_buttonChangeGraphicsItem_clicked()
 
 void MainWindow::on_actionOpen_triggered()
 { // TODO открыть файл
+    QString fileToOpen = QFileDialog::getOpenFileName(this, "Open SVG",  documentFileName, "SVG files (*.svg)");
 
+    if (fileToOpen.isEmpty())
+           return;
+
+    documentFileName = fileToOpen;
+
+    ui->graphicsView->readFromFile(documentFileName);
 }
 
 void MainWindow::on_actionSave_triggered()
 {
-  ui->graphicsView->saveToFile(documentFileName); // TODO сейчас нет защиты от ошибок файловой системы
+  ui->graphicsView->saveToFile(documentFileName);
 }
 
 void MainWindow::on_actionSave_As_triggered()

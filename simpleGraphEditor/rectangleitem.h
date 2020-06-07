@@ -42,6 +42,7 @@ public:
     virtual int getAngle() {return angle;};
     virtual void setAngle(int newAngle);
     virtual void setLineWidth(int lineWidth);
+    void setHeightWidth(int height, int width);
 
 };
 

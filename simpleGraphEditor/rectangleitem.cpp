@@ -6,10 +6,7 @@
 RectangleItem::RectangleItem(QObject *parent):
   MovableItem(parent)
 {
-    width=120;          // ширина прямоугольника
-    height=60;          // высота прямоугольника
-    leftBaseCorner=-width/2; // левый/верхний угол привязки прямоугольника
-    topBaseCorner=-height/2;
+    setHeightWidth(60, 120); // TODO вынести в константы
 
     angle=currentAngle;           // угол поворта прямоугольника в градусах
 
@@ -24,6 +21,15 @@ RectangleItem::RectangleItem(QObject *parent):
 
 RectangleItem::~RectangleItem()
 {
+}
+
+void  RectangleItem::setHeightWidth(int height, int width)
+{
+    this->width=width;       // ширина прямоугольника
+    this->height=height;     // высота прямоугольника
+    leftBaseCorner=-width/2; // левый/верхний угол привязки прямоугольника
+    topBaseCorner=-height/2;
+
 }
 
 void HotPoints::set(int width, int height, int angle)

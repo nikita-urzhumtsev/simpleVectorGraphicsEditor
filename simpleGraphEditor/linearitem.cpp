@@ -5,15 +5,18 @@
 LinearItem::LinearItem(QObject *parent):
     MovableItem(parent)
 {
-    lineNodes.append(QPointF(  0,  0));  // созданию линию по умолчанию
-    lineNodes.append(QPointF(100, 100)); // дальнейшее развитие может быть рисовать ее мышкой
-
     nodeIsChangingNow=false;
 }
 
 LinearItem::~LinearItem()
 {
 }
+
+void LinearItem::appendPoint(QPointF point)
+{
+    lineNodes.append(point);
+}
+
 
 void LinearItem::setLineWidth(int lineWidth)
 {

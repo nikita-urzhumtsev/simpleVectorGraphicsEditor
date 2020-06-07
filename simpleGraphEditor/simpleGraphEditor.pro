@@ -1,4 +1,4 @@
-QT       += core gui svg
+QT       += core gui svg xml
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -22,7 +22,8 @@ SOURCES += \
     movableitem.cpp \
     mygraphicview.cpp \
     rectangleitem.cpp \
-    selectcolorbutton.cpp
+    selectcolorbutton.cpp \
+    svgreader.cpp
 
 HEADERS += \
     linearitem.h \
@@ -30,7 +31,8 @@ HEADERS += \
     movableitem.h \
     mygraphicview.h \
     rectangleitem.h \
-    selectcolorbutton.h
+    selectcolorbutton.h \
+    svgreader.h
 
 FORMS += \
     mainwindow.ui

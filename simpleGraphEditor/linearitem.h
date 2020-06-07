@@ -35,6 +35,7 @@ public:
     virtual int getAngle() {return 0;};  // пустая функцая, в принципе можно было бы сделать еще вращение фигуры
     virtual void setAngle(int newAngle); // пустая функцая, в принципе можно было бы сделать еще вращение фигуры
     virtual void setLineWidth(int lineWidth);
+    void appendPoint(QPointF point); // добавить точку в конец линии
 };
 
 #endif // LINEARITEM_H

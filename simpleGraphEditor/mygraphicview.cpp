@@ -4,6 +4,7 @@
 #include "rectangleitem.h"
 #include "mainwindow.h"
 #include <QtSvg/QtSvg>
+#include "svgreader.h"
 
 //TODO все magic numbers надо вынести в константы (по всему проекту)
 
@@ -30,20 +31,12 @@ MyGraphicView::~MyGraphicView()
 { //TODO почистить все нарисанные объекты (в том числе при создании нового файла)
 
 }
-// Метод для удаления всех элементов из группы
-void MyGraphicView::deleteItemsFromGroup(QGraphicsItemGroup *group)
-{
-    //по всем элементы сцены, и если они принадлежат группе
-    foreach( QGraphicsItem *item, scene->items(group->boundingRect())) {
-       if(item->group() == group ) {
-          delete item;
-       }
-    }
-}
 
 void MyGraphicView::createMovableLine()
 {
   LinearItem *item = new LinearItem(); // перетаскиваемый прямоугольник
+  item->appendPoint(QPointF(  0,  0));  // созданию линию по умолчанию
+  item->appendPoint(QPointF(100, 100)); // дальнейшее развитие может быть рисовать ее мышкой
   item->setPos(100,100);           // координаты для нового объекта по умолчанию (TODO по хорошему его нужно рисовать мышкой)
   scene->addItem(item);            // вставляю элемент в графическую сцену
 
@@ -84,5 +77,24 @@ void MyGraphicView::saveToFile(const QString & documentFileName)
     painter.end();              // Закрываю устройство вывода
 
     activeGraphicsItem=savedItem; // восстанавливаю активный элемент на экране
+}
+
+
+void MyGraphicView::readFromFile(const QString & documentFileName)
+{
+   scene->clear();
+   activeGraphicsItem=nullptr;
+
+   SvgReader svgReader(documentFileName);
+   if (svgReader.open())
+   {
+      scene->setSceneRect(svgReader.getSizes()); // читаю размеры сцены из файла
+
+      // читаю графические объекты из файла
+      for (auto item : svgReader.getElements())
+        scene->addItem(item);
+
+      svgReader.close();
+   }
 }
 
