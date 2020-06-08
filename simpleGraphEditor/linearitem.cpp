@@ -1,6 +1,6 @@
 #include "linearitem.h"
-#include "mainwindow.h"
 #include <QtMath>
+#include "globaldata.h"
 
 LinearItem::LinearItem(QObject *parent):
     MovableItem(parent)
@@ -34,9 +34,15 @@ QRectF LinearItem::frameRect() const
 }
 
 QRectF LinearItem::boundingRect() const
-{   QRectF frameRect=this->frameRect();
+{   // большой размер нужен тогда, когда я меняю размер или двигаю или поворачиваю объект
+    // тогда нужно правильно перерисовавыть большую площадь
+    QRectF frameRect=this->frameRect();
     std::vector<qreal> dimentions = {frameRect.height()+borderWidth, frameRect.width()+borderWidth};
     int extraSpace = ( *std::max_element(dimentions.begin(), dimentions.end()) ) / 2 ;
+
+    // если элемент не активен, то этот прямоугольник должен быть примерно размером с объект и используется для захвата мыши
+    if (globalData.activeGraphicsItem != this)
+            extraSpace=2;
 
     // квадрат с самой большой стороной, куда гарантированно помещается прямоугольник с рамкой
     return frameRect.adjusted(-extraSpace,-extraSpace,extraSpace,extraSpace);
@@ -54,21 +60,21 @@ void LinearItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
 
     // если эта фигура сейчас активна, то обрамляю ее рамкой
     // и выделяю "горячие точки" - вершины углов и начало и конец линии
-    if (activeGraphicsItem == this)
+    if (globalData.activeGraphicsItem == this)
     {
         // рисую границы активного объекта
-        QPen pen(Qt::gray );       //TODO цвет и стиль рамки выделить в общие константы для всех фигур
-        pen.setStyle(Qt::DotLine);
+        QPen pen(selectedItemBorderColor );
+        pen.setStyle(selectedItemLineStyle );
         painter->setPen(pen);
         painter->setBrush(Qt::NoBrush);
         QRectF frameRect=this->frameRect();
         painter->drawRect(frameRect);
 
         qreal radius=hotPointVisibleRadius();
-        pen.setColor(Qt::darkBlue); // TODO цвет горячих точек нужно сделать контрастным с цветом рамки
-        pen.setStyle(Qt::SolidLine);
+        pen.setColor(hotPointColor);
+        pen.setStyle(hotPointLineStyle);
         painter->setPen(pen);
-        painter->setBrush(Qt::darkBlue); // TODO цвет горячих точек нужно сделать контрастным с цветом рамки
+        painter->setBrush(hotPointColor); // TODO цвет горячих точек нужно сделать контрастным с цветом рамки
         // бегу по вершинам полилинии и выделяю горячие точки
         for (auto aPoint : lineNodes)
         {
@@ -128,9 +134,7 @@ qreal distanceToLine(QPointF M, QPointF A, QPointF B)
 }
 
 void LinearItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
-{ // TODO
-  //  qDebug() << "line.mouseMoveEvent:    pos=(x:" << event->pos().x()<<", y:"<<event->pos().y()<< "), A=(x:" << 0 <<", y:"<< 0 << ") ";
-
+{
     if (nodeIsChangingNow)
     {  // если сейчас происходит перемещение узла
        int i=lineNodes.indexOf(this->mousePressStartNode);
@@ -149,12 +153,13 @@ void LinearItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 }
 
 void LinearItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
-{ // TODO сравнить с hover - возмоно, что можно все превратить в простые и маленькие функции
+{   // TODO сравнить с hover - возможно, что можно все превратить в простые и маленькие функции
+    //      оставил это намеренно, не стал делать в этом случае шаблонную функцию (а для линий сделал), чтобы показать
+    //      процесс появления подобных шаблонных функций (фактически это вторая фаза рефакторинга, когда все в целом работает и потом
+    //      привожу код либо к читабельному виду, либо его усовершенствую, чтобы не нужно было одни и те же дейстивя делать несколько раз)
 
     //запоминаю начальное смещение точки в фигуре, ее ширину, высоту и начальный угол, когда была нажата клавиша мыши
     mousePressStartPos=event->pos();
-
-    qDebug() << "line.mousePressEvent:   pos=(x:" << event->pos().x()<<", y:"<<event->pos().y()<< "), A=(x:" << 0 <<", y:"<< 0 << ") ";
 
     qreal distance;
 
@@ -184,7 +189,7 @@ void LinearItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
       this->setCursor(QCursor(Qt::ClosedHandCursor));
 
       // меняю активный элемент
-      setActiveGraphicsItem(this);
+      globalData.setActiveGraphicsItem(this);
     }
 
 }

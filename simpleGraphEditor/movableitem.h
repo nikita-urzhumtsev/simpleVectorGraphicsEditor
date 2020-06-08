@@ -5,7 +5,6 @@
 #include <QGraphicsItem>
 #include <QPainter>
 #include <QGraphicsSceneMouseEvent>
-#include <QDebug>
 #include <QCursor>
 
 class HotPoints
@@ -28,6 +27,7 @@ public:
 class MovableItem : public QObject, public QGraphicsItem
 {
     Q_OBJECT
+    Q_INTERFACES(QGraphicsItem)
   public:
       explicit MovableItem(QObject *parent = nullptr);
       ~MovableItem();
@@ -45,6 +45,12 @@ class MovableItem : public QObject, public QGraphicsItem
       virtual QRectF frameRect() const =0; // вычисление рамки фигуры
       qreal hotPointVisibleRadius(); //видимый радиус горячей точки
       qreal hotPointRadius();        //радиус зоны активности горячей точки
+
+      const int fixedMark=3;                                   //размер кружка для горячей точки
+      const Qt::GlobalColor selectedItemBorderColor=Qt::gray;  // цвет рамки выделенной фигуры
+      const Qt::PenStyle    selectedItemLineStyle=Qt::DotLine; // тип линии для отрисовки рамки вокруг выделенной фигуры
+      const Qt::GlobalColor hotPointColor=Qt::darkBlue;        // цвет горячей точки (за ктоорую можно перемещать узел, поворачивать или изменять размер)
+      const Qt::PenStyle    hotPointLineStyle=Qt::SolidLine;   // тип линии горячей точки
 
    public:
       virtual QColor getFillColor(){return fillColor;};

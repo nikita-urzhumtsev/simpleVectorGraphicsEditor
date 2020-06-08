@@ -1,25 +1,24 @@
 #include "movableitem.h"
-#include "mainwindow.h"
+#include "globaldata.h"
 
 
 MovableItem::MovableItem(QObject *parent) :
     QObject(parent), QGraphicsItem(), mousePressStartPos(0,0)
 {
-    fillColor=currentFillColor;   // цвет заливки
-    borderWidth=currentLineWidth; // полщина линии
-    borderColor=currentLineColor; // цвет линии
+    fillColor=globalData.currentFillColor;   // цвет заливки
+    borderWidth=globalData.currentLineWidth; // полщина линии
+    borderColor=globalData.currentLineColor; // цвет линии
 
     // меняю активный элемент
-    // TODO сравнить с функцией void  setActiveGraphicsItem(QGraphicsItem * newActiveItem) - отрефакторить
-    if (activeGraphicsItem)
-    { QGraphicsItem * deactivatedItem=activeGraphicsItem;
-      activeGraphicsItem=this;
+    if (globalData.activeGraphicsItem)
+    { QGraphicsItem * deactivatedItem=globalData.activeGraphicsItem;
+      globalData.activeGraphicsItem=this;
       deactivatedItem->setAcceptHoverEvents(false);
       deactivatedItem->update();
     }
     else
     {
-      activeGraphicsItem=this;
+      globalData.activeGraphicsItem=this;
       setAcceptHoverEvents(true);
     }
 }

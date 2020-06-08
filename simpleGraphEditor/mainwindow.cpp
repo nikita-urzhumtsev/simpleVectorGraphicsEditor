@@ -1,61 +1,26 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-
+#include "globaldata.h"
 #include <QPainter>
 #include <QColor>
 #include <QColorDialog>
 #include <QFileDialog>
 #include "movableitem.h"
 
-QColor currentLineColor(Qt::cyan);
-QColor currentFillColor(Qt::white);
-int    currentLineWidth=1;
-int    currentAngle=10;
-QString documentFileName("newFile.svg"); // имя документа
 
-MovableItem * activeGraphicsItem = nullptr;
-MainWindow * mainWindow = nullptr;
-
-void  setActiveGraphicsItem(MovableItem * newActiveItem)
-{
-    if (activeGraphicsItem && activeGraphicsItem!=newActiveItem)
-    { QGraphicsItem * deactivatedItem=activeGraphicsItem;
-      activeGraphicsItem=newActiveItem;
-      deactivatedItem->setAcceptHoverEvents(false);
-      deactivatedItem->update();
-    }
-    else
-    {
-      activeGraphicsItem=newActiveItem;
-    }
-
-    if (activeGraphicsItem)
-    {   MovableItem * grItem=dynamic_cast<MovableItem *>(activeGraphicsItem);
-        currentFillColor=grItem->getFillColor();
-        currentLineColor=grItem->getLineColor();
-        currentLineWidth=grItem->getLineWidth();
-        currentAngle=grItem->getAngle();
-        activeGraphicsItem->setAcceptHoverEvents(true);
-        activeGraphicsItem->update();
-        mainWindow->updateBottons();
-    }
-
-}
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
-    //setFixedSize(800, 600); // Фиксированный размер окна
+    setFixedSize(800, 600);
     ui->setupUi(this);
-
     ui->graphicsView->setRenderHint(QPainter::Antialiasing);
     ui->graphicsView->setCacheMode(QGraphicsView::CacheBackground);
     ui->graphicsView->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
-
+    ui->graphicsView->setFixedSize(720,578);
     updateBottons();
-
-    mainWindow=this;
+    globalData.mainWindow=this;
 }
 
 MainWindow::~MainWindow()
@@ -75,26 +40,26 @@ void MainWindow::on_buttonCreatePolyline_clicked()
 
 void MainWindow::on_buttonDeleteGraphicsItem_clicked()
 {
-    if (activeGraphicsItem)
+    if (globalData.activeGraphicsItem)
     {
-       ui->graphicsView->removeGraphicsItem(activeGraphicsItem);
-       activeGraphicsItem=nullptr;
+       ui->graphicsView->removeGraphicsItem(globalData.activeGraphicsItem);
+       globalData.activeGraphicsItem=nullptr;
     }
 }
 
 void MainWindow::on_buttonSelectColor_clicked()
 {
-  selectColor(ui->buttonSelectColor, currentFillColor);
+  selectColor(ui->buttonSelectColor, globalData.currentFillColor);
 }
 
 
 void MainWindow::on_buttonSelectLineColor_clicked()
 {
-  selectColor(ui->buttonSelectLineColor, currentLineColor);
+  selectColor(ui->buttonSelectLineColor, globalData.currentLineColor);
 }
 
 void MainWindow::selectColor(QPushButton * button, QColor & changedColor)
-{ // TODO привести к правильной модели данных
+{
     QColor newColor = QColorDialog::getColor(changedColor,parentWidget());
     if ( newColor != changedColor )
     {
@@ -118,68 +83,69 @@ void MainWindow::setButtonColor(QPushButton * button, const QColor & backgroundC
 
 void MainWindow::on_spinBoxLineWidth_valueChanged(int newWidth)
 {
-   currentLineWidth=newWidth;
+   globalData.currentLineWidth=newWidth;
 }
 
 void MainWindow::on_spinBoxAngle_valueChanged(int newAngle)
 {
-    currentAngle=newAngle;
+    globalData.currentAngle=newAngle;
 }
 
 void MainWindow::updateBottons()
 {
-    setButtonColor(ui->buttonSelectLineColor, currentLineColor);
-    setButtonColor(ui->buttonSelectColor, currentFillColor);
-    ui->spinBoxLineWidth->setValue(currentLineWidth);
-    ui->spinBoxAngle->setValue(currentAngle);
+    setButtonColor(ui->buttonSelectLineColor, globalData.currentLineColor);
+    setButtonColor(ui->buttonSelectColor, globalData.currentFillColor);
+    ui->spinBoxLineWidth->setValue(globalData.currentLineWidth);
+    ui->spinBoxAngle->setValue(globalData.currentAngle);
 }
 
 
 
 void MainWindow::on_buttonChangeGraphicsItem_clicked()
 {
-   if (activeGraphicsItem)
+   if (globalData.activeGraphicsItem)
    {
-       MovableItem * item = dynamic_cast<MovableItem *>(activeGraphicsItem);
-       item->setFillColor(currentFillColor);
-       item->setLineColor(currentLineColor);
-       item->setLineWidth(currentLineWidth);
-       item->setAngle(currentAngle);
+       MovableItem * item = dynamic_cast<MovableItem *>(globalData.activeGraphicsItem);
+       item->setFillColor(globalData.currentFillColor);
+       item->setLineColor(globalData.currentLineColor);
+       item->setLineWidth(globalData.currentLineWidth);
+       item->setAngle(globalData.currentAngle);
        item->update();
    }
 
 }
 
 void MainWindow::on_actionOpen_triggered()
-{ // TODO открыть файл
-    QString fileToOpen = QFileDialog::getOpenFileName(this, "Open SVG",  documentFileName, "SVG files (*.svg)");
+{ // открыть файл
+    QString fileToOpen = QFileDialog::getOpenFileName(this, "Open SVG",  globalData.documentFileName, "SVG files (*.svg)");
 
     if (fileToOpen.isEmpty())
            return;
 
-    documentFileName = fileToOpen;
+    globalData.documentFileName = fileToOpen;
 
-    ui->graphicsView->readFromFile(documentFileName);
+    ui->graphicsView->readFromFile(globalData.documentFileName);
 }
 
 void MainWindow::on_actionSave_triggered()
 {
-  ui->graphicsView->saveToFile(documentFileName);
+  ui->graphicsView->saveToFile(globalData.documentFileName);
 }
 
 void MainWindow::on_actionSave_As_triggered()
 {
-   QString newPath = QFileDialog::getSaveFileName(this, "Save SVG",  documentFileName, "SVG files (*.svg)");
+   QString newPath = QFileDialog::getSaveFileName(this, "Save SVG",  globalData.documentFileName, "SVG files (*.svg)");
 
    if (newPath.isEmpty())
           return;
 
-   documentFileName = newPath;
+   globalData.documentFileName = newPath;
 
-   ui->graphicsView->saveToFile(documentFileName);
+   ui->graphicsView->saveToFile(globalData.documentFileName);
 }
 
 void MainWindow::on_actionExit_triggered()
-{ // TODO вежливо поставить защиту от выхода с несохраненными данными
+{ // вежливо было бы поставить защиту от выхода с несохраненными данными
+  // но в ТЗ в явной форме не указано, точка для возможного уточнения спецификации, но не в рамках тестовой задачки
   this->close();
 }

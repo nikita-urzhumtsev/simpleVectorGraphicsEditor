@@ -2,11 +2,9 @@
 #include "movableitem.h"
 #include "linearitem.h"
 #include "rectangleitem.h"
-#include "mainwindow.h"
+#include "globaldata.h"
 #include <QtSvg/QtSvg>
 #include "svgreader.h"
-
-//TODO все magic numbers надо вынести в константы (по всему проекту)
 
 MyGraphicView::MyGraphicView(QWidget *parent)
          : QGraphicsView(parent)
@@ -24,11 +22,11 @@ MyGraphicView::MyGraphicView(QWidget *parent)
 
        scene = new QGraphicsScene();       // Инициализация сцены для отрисовки
        this->setScene(scene);              // Устанавливаю сцену в виджет
-       scene->setSceneRect(0,0,3000,4000); // размер сцены
+       scene->setSceneRect(0,0,globalData.sceneWidth,globalData.sceneHeight); // размер сцены
 }
 
 MyGraphicView::~MyGraphicView()
-{ //TODO почистить все нарисанные объекты (в том числе при создании нового файла)
+{
 
 }
 
@@ -69,21 +67,21 @@ void MyGraphicView::saveToFile(const QString & documentFileName)
 
     QPainter painter;
 
-    MovableItem * savedItem=activeGraphicsItem; // активный элемент в афйле показывать не надо
-    activeGraphicsItem = nullptr;               // поэому его запомню и обнулю
+    MovableItem * savedItem=globalData.activeGraphicsItem; // активный элемент в афйле показывать не надо
+    globalData.activeGraphicsItem = nullptr;               // поэому его запомню и обнулю
 
     painter.begin(&generator);  // Устанавливаю устройство, где буду рисовать
     scene->render(&painter);    // Сцена сама себя умеет рисовать
     painter.end();              // Закрываю устройство вывода
 
-    activeGraphicsItem=savedItem; // восстанавливаю активный элемент на экране
+    globalData.activeGraphicsItem=savedItem; // восстанавливаю активный элемент на экране
 }
 
 
 void MyGraphicView::readFromFile(const QString & documentFileName)
 {
    scene->clear();
-   activeGraphicsItem=nullptr;
+   globalData.activeGraphicsItem=nullptr;
 
    SvgReader svgReader(documentFileName);
    if (svgReader.open())

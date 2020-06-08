@@ -4,6 +4,7 @@
 #include <QMessageBox>
 #include <QStringList>
 #include <QtMath>
+#include "globaldata.h"
 
 SvgReader::SvgReader(const QString & fileName):
     filename(fileName), file(filename)
@@ -191,7 +192,7 @@ QRectF SvgReader::getSizes()
 
     // Если файл не открыт
     if (!file.isOpen())
-        return QRectF(0,0,3000,4000);       // то задам размер для сцены по умолчанию
+        return QRectF(0,0,globalData.sceneWidth,globalData.sceneHeight);       // то задам размер для сцены по умолчанию
 
     // пример тега из файла:
     //    <svg width="1058.33mm" height="1411.11mm"
@@ -212,5 +213,5 @@ QRectF SvgReader::getSizes()
     }
 
     // что-то пошло не так - в файле нет тега svg, верну значения по умолчанию
-    return QRectF(0,0,3000,4000); // TODO загнать эти цифры в константы (использую не меньше, чем в 3 местах)
+    return QRectF(0,0,globalData.sceneWidth,globalData.sceneHeight);
 }

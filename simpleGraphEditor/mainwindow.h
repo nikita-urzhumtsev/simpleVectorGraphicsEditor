@@ -11,14 +11,6 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
-//TODO - убрать в подходящее место глобальные переменные
-extern QColor currentLineColor;
-extern QColor currentFillColor;
-extern int    currentLineWidth;
-extern int    currentAngle;
-extern MovableItem * activeGraphicsItem;
-const int fixedMark=3; //размер кружка для горячей точки
-void  setActiveGraphicsItem(MovableItem * newActiveItem);
 
 class MainWindow : public QMainWindow
 {

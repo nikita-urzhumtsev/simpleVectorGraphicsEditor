@@ -1,14 +1,14 @@
 #include "rectangleitem.h"
 #include <QtMath>
 
-#include "mainwindow.h" //TODO там пока(!!!) живут глобальные данные - непорядок
+#include "globaldata.h"
 
 RectangleItem::RectangleItem(QObject *parent):
   MovableItem(parent)
 {
     setHeightWidth(60, 120); // TODO вынести в константы
 
-    angle=currentAngle;           // угол поворта прямоугольника в градусах
+    angle=globalData.currentAngle;           // угол поворта прямоугольника в градусах
 
     isRotatingNow=false;          // флаг состояния вращения в настоящий момент
     widthIsChangingNow=false;     // флаг состояния изменения ширины в настоящий момент
@@ -50,10 +50,6 @@ void HotPoints::set(int width, int height, int angle)
 
 }
 
-//////////////////-------------------------------
-///
-///
-/// -------------------------------------------
 qreal vectorLength( const QPointF & A)
 {   qreal x1=A.x(), y1=A.y();
     return qSqrt(x1 * x1 + y1 * y1);
@@ -82,8 +78,14 @@ QRectF RectangleItem::frameRect() const
 }
 
 QRectF RectangleItem::boundingRect() const
-{   std::vector<int> dimentions = {height+borderWidth, width+borderWidth, mousePressStartWidth+borderWidth, mousePressStartHeight+borderWidth};
+{   // большой размер нужен тогда, когда я меняю размер или двигаю или поворачиваю объект
+    // тогда нужно правильно перерисовавыть большую площадь
+    std::vector<int> dimentions = {height+borderWidth, width+borderWidth, mousePressStartWidth+borderWidth, mousePressStartHeight+borderWidth};
     int extraSpace = ( *std::max_element(dimentions.begin(), dimentions.end()) ) / 2 ;
+
+    // если элемент не активен, то этот прямоугольник должен быть примерно размером с объект и используется для захвата мыши
+    if (globalData.activeGraphicsItem != this)
+        extraSpace=2;
 
     // квадрат с самой большой стороной, куда гаратированно помещается прямоугольник с рамкой
     return frameRect().adjusted(-extraSpace,-extraSpace,extraSpace,extraSpace);
@@ -102,11 +104,11 @@ void RectangleItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opt
     painter->drawRect(leftBaseCorner,topBaseCorner,width,height);
 
 
-    if (activeGraphicsItem == this)
+    if (globalData.activeGraphicsItem == this)
     { // рисую границы активного объекта
       painter->rotate(-angle);
-      QPen pen(Qt::gray );
-      pen.setStyle(Qt::DotLine);
+      QPen pen(selectedItemBorderColor);
+      pen.setStyle(selectedItemLineStyle);
       painter->setPen(pen);
       painter->setBrush(Qt::NoBrush);
       QRectF frameRect=this->frameRect();
@@ -117,10 +119,10 @@ void RectangleItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opt
 
       // рисую горячие точки для изменения размера
       qreal radius=hotPointVisibleRadius();
-      pen.setColor(Qt::darkBlue); // TODO цвет горячих точек нужно сделать контрастным с цветом рамки
-      pen.setStyle(Qt::SolidLine);
+      pen.setColor(hotPointColor);
+      pen.setStyle(hotPointLineStyle);
       painter->setPen(pen);
-      painter->setBrush(Qt::darkBlue); // TODO цвет горячих точек нужно сделать контрастным с цветом рамки
+      painter->setBrush(hotPointColor); // TODO цвет горячих точек нужно сделать контрастным с цветом рамки
       painter->drawEllipse( QPointF( hotPoints.Ax, hotPoints.Ay),radius,radius);
       painter->drawEllipse( QPointF(-hotPoints.Ax,-hotPoints.Ay),radius,radius);
       painter->drawEllipse( QPointF( hotPoints.Dx, hotPoints.Dy),radius,radius);
@@ -139,15 +141,13 @@ void RectangleItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opt
 
 void RectangleItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-    qDebug() << "rect.mouseMoveEvent:    pos=(x:" << event->pos().x()<<", y:"<<event->pos().y()<< "), A=(x:" << hotPoints.Ax<<", y:"<<hotPoints.Ay<< ") ";
-
     if ( this->widthIsChangingNow)
       {
         this->width=2*vectorLength(event->pos());                           // меняю ширину
         leftBaseCorner=-width/2;                                            // обновляю координаты верхнего левого угла
         hotPoints.set(width,height,angle);                                  // обновляю горячие точки и frameRect
         update();                                                           // перерисовываю в сцене
-        setActiveGraphicsItem(this);                                        // обновляю данные в главном окне
+        globalData.setActiveGraphicsItem(this);                                        // обновляю данные в главном окне
       }
     else
     if ( this->heightIsChangingNow)
@@ -156,7 +156,7 @@ void RectangleItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         topBaseCorner=-height/2;                                            // обновляю координаты верхнего левого угла
         hotPoints.set(width,height,angle);                                  // обновляю горячие точки и frameRect
         update();                                                           // перерисовываю в сцене
-        setActiveGraphicsItem(this);                                        // обновляю данные в главном окне
+        globalData.setActiveGraphicsItem(this);                                        // обновляю данные в главном окне
       }
     else
     if ( this->isRotatingNow)
@@ -164,7 +164,7 @@ void RectangleItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         this->angle=mousePressStartAngle+angleBetweenVectors(mousePressStartPos, event->pos()); // собственно вращаю
         hotPoints.set(width,height,angle);                                  // обновляю горячие точки и frameRect
         update();                                                           // перерисовываю в сцене
-        setActiveGraphicsItem(this);                                        // обновляю данные в главном окне
+        globalData.setActiveGraphicsItem(this);                                        // обновляю данные в главном окне
       }
     else
       { // двигаю объект
@@ -175,8 +175,6 @@ void RectangleItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
 void RectangleItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    qDebug() << "rect.mousePressEvent:   pos=(x:" << event->pos().x()<<", y:"<<event->pos().y()<< "), C=(x:" << hotPoints.Cx<<", y:"<<hotPoints.Cy<< ") ";
-
     //запоминаю начальное смещение точки в фигуре, ее ширину, высоту и начальный угол, когда была нажата клавиша мыши
     mousePressStartPos=event->pos();
     mousePressStartAngle=this->angle;
@@ -223,7 +221,7 @@ void RectangleItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
         this->setCursor(QCursor(Qt::ClosedHandCursor));
 
         // меняю активный элемент
-        setActiveGraphicsItem(this);
+        globalData.setActiveGraphicsItem(this);
       }
     Q_UNUSED(event);
 }
@@ -236,8 +234,6 @@ void RectangleItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
     isRotatingNow=false;
     widthIsChangingNow=false;
     heightIsChangingNow=false;
-
-    qDebug() << "rect.mouseReleaseEvent: pos=(x:" << event->pos().x()<<", y:"<<event->pos().y()<< "), C=(x:" << hotPoints.Cx<<", y:"<<hotPoints.Cy<< ") ";
 
     Q_UNUSED(event);
 }
@@ -263,7 +259,6 @@ void RectangleItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
        )
       {
         this->setCursor(QCursor(Qt::SizeAllCursor));
-        qDebug() << "rect.hoverMoveEvent S : pos=(x:" << event->pos().x()<<", y:"<<event->pos().y()<< "), A=(x:" << hotPoints.Ax<<", y:"<<hotPoints.Ay<< ") ";
       }
     else
     if ( // проверяю попадание в зоны захвата мышкой для вращения
@@ -272,17 +267,12 @@ void RectangleItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
        )
       {
         this->setCursor(QCursor(Qt::CrossCursor));
-        qDebug() << "rect.hoverMoveEvent R : pos=(x:" << event->pos().x()<<", y:"<<event->pos().y()<< "), C=(x:" << hotPoints.Cx<<", y:"<<hotPoints.Cy<< ") ";
       }
     else
       {
-        qDebug() << "rect.hoverMoveEvent - : pos=(x:" << event->pos().x()<<", y:"<<event->pos().y()<< "), C=(x:" << hotPoints.Cx<<", y:"<<hotPoints.Cy<< ") ";
         this->setCursor(QCursor(Qt::ArrowCursor));
       }
-
-
     Q_UNUSED(event);
-
 }
 
 void RectangleItem::setLineWidth(int lineWidth)
