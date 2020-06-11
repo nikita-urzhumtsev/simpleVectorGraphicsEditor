@@ -83,8 +83,8 @@ QRectF RectangleItem::boundingRect() const
     std::vector<int> dimentions = {height+borderWidth, width+borderWidth, mousePressStartWidth+borderWidth, mousePressStartHeight+borderWidth};
     int extraSpace = ( *std::max_element(dimentions.begin(), dimentions.end()) ) / 2 ;
 
-    // если элемент не активен, то этот прямоугольник должен быть примерно размером с объект и используется для захвата мыши
-    if (globalData.activeGraphicsItem != this)
+    // если элемент не модифицируется прямо сейчас, то этот прямоугольник должен быть примерно размером с объект и используется для захвата мыши
+    if ( !widthIsChangingNow && !heightIsChangingNow && !isRotatingNow )
         extraSpace=2;
 
     // квадрат с самой большой стороной, куда гаратированно помещается прямоугольник с рамкой

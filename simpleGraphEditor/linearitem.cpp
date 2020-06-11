@@ -40,8 +40,8 @@ QRectF LinearItem::boundingRect() const
     std::vector<qreal> dimentions = {frameRect.height()+borderWidth, frameRect.width()+borderWidth};
     int extraSpace = ( *std::max_element(dimentions.begin(), dimentions.end()) ) / 2 ;
 
-    // если элемент не активен, то этот прямоугольник должен быть примерно размером с объект и используется для захвата мыши
-    if (globalData.activeGraphicsItem != this)
+    // если элемент прямо сейчас не изменяется, то этот прямоугольник должен быть примерно размером с объект и используется для захвата мыши
+    if (!nodeIsChangingNow)
             extraSpace=2;
 
     // квадрат с самой большой стороной, куда гарантированно помещается прямоугольник с рамкой
@@ -57,6 +57,8 @@ void LinearItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
     painter->setPen(pen);
     painter->setBrush(getFillColor());
     painter->drawPolyline(this->lineNodes);
+
+    //TODO задать shape , чтобы правильно определять прозрачность фигуры
 
     // если эта фигура сейчас активна, то обрамляю ее рамкой
     // и выделяю "горячие точки" - вершины углов и начало и конец линии
@@ -184,6 +186,20 @@ void LinearItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
     }
 
 
+    // проверяю достаточно ли близко курсор мыши к линии
+    bool closeToLine=findSuitableLineAndDo( event->pos(),[this, event](int i)
+    { // да, курсор рядом с линией, меняю вид указателя мыши
+      // двигаю объект
+      // готовлю мышку к перетаскиванию
+      this->setCursor(QCursor(Qt::ClosedHandCursor));
+
+      // меняю активный элемент
+      globalData.setActiveGraphicsItem(this);
+      Q_UNUSED(event);
+      Q_UNUSED(i);
+    } );
+    if (closeToLine) return;
+/*
     { // двигаю объект
       // готовлю мышку к перетаскиванию
       this->setCursor(QCursor(Qt::ClosedHandCursor));
@@ -191,6 +207,8 @@ void LinearItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
       // меняю активный элемент
       globalData.setActiveGraphicsItem(this);
     }
+    */
+      event->setAccepted(false);
 
 }
 
